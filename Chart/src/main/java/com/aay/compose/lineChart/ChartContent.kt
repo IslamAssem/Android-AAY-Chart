@@ -76,7 +76,9 @@ internal fun ChartContent(
         ).size.width
         val spacingX = (size.width / 50.dp.toPx()).dp
         val spacingY = (size.height / 8.dp.toPx()).dp
-        val xRegionWidth = (size.width.toDp() / (xAxisData.size - 1).toDp()).toDp() - (textLayoutResult.toDp() / 2)
+//        val xRegionWidth = (size.width.toDp() / (xAxisData.size - 1).toDp()).toDp() - (textLayoutResult.toDp() / 2)
+        val xRegionWidth = (((size.width - textLayoutResult) / (xAxisData.size - 1)).toDp()) - 30.dp
+
 
         baseChartContainer(
             xAxisData = xAxisData,

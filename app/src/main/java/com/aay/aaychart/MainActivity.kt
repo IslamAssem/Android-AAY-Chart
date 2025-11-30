@@ -54,10 +54,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 //    RadarChartSample()
 
     }
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+
 }
 
 @Preview(showBackground = true)

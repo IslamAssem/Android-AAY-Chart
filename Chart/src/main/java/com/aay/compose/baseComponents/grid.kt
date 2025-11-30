@@ -21,7 +21,7 @@ internal fun DrawScope.grid(
     backgroundLineWidth: Float,
     showGridWithSpacer: Boolean,
     spacingY: Dp,
-    yAxisRange: Int,
+    actualSteps: Int,
     specialChart: Boolean,
     upperValue: Float,
     textMeasurer: TextMeasurer,
@@ -39,14 +39,17 @@ internal fun DrawScope.grid(
 
     if (isShowGrid) {
         when (gridOrientation) {
-            GridOrientation.HORIZONTAL -> drawHorizontalGrid(
-                spacingY = spacingY,
-                yAxisRange = yAxisRange,
-                gridColor = gridColor,
-                backgroundLineWidth = backgroundLineWidth,
-                showGridWithSpacer = showGridWithSpacer,
-                yTextLayoutResult = textSpace
-            )
+            GridOrientation.HORIZONTAL -> {
+                drawHorizontalGrid(
+                    spacingY = spacingY,
+                    actualYAxisSteps = actualSteps, // Use the actual steps from yAxisDrawing
+                    gridColor = gridColor,
+                    backgroundLineWidth = backgroundLineWidth,
+                    showGridWithSpacer = showGridWithSpacer,
+                    yTextLayoutResult = yTextLayoutResult
+                )
+
+            }
 
             GridOrientation.VERTICAL -> drawVerticalGrid(
                 xAxisDataSize = xAxisDataSize,
@@ -60,19 +63,8 @@ internal fun DrawScope.grid(
             else -> {
                 drawHorizontalGrid(
                     spacingY = spacingY,
-                    yAxisRange = yAxisRange,
+                    actualYAxisSteps = actualSteps,
                     gridColor = gridColor,
-                    xEndLength = 38.dp.toPx(),
-                    backgroundLineWidth = backgroundLineWidth,
-                    showGridWithSpacer = showGridWithSpacer,
-                    yTextLayoutResult = textSpace
-                )
-
-                drawVerticalGrid(
-                    xAxisDataSize = xAxisDataSize,
-                    xRegionWidth = xRegionWidth,
-                    gridColor = gridColor,
-                    yEndLength = 9f.toDp(),
                     backgroundLineWidth = backgroundLineWidth,
                     showGridWithSpacer = showGridWithSpacer,
                     yTextLayoutResult = textSpace
@@ -82,12 +74,10 @@ internal fun DrawScope.grid(
         }
     }
 }
-
 private fun DrawScope.drawHorizontalGrid(
     spacingY: Dp,
-    yAxisRange: Int,
+    actualYAxisSteps: Int, // Changed parameter name to be clearer
     gridColor: Color,
-    xEndLength: Float = 0f,
     backgroundLineWidth: Float,
     showGridWithSpacer: Boolean,
     yTextLayoutResult: Int,
@@ -98,10 +88,10 @@ private fun DrawScope.drawHorizontalGrid(
 
     val textSpace = yTextLayoutResult - (yTextLayoutResult/4)
 
-    (0..yAxisRange).forEach { i ->
+    (0..actualYAxisSteps).forEach { i ->
         yAxisList.add(
             size.height.toDp()
-                .toPx() - (spacingY.toPx()) - i * (size.height.toDp() - spacingY).toPx() / yAxisRange
+                .toPx() - (spacingY.toPx()) - i * (size.height.toDp() - spacingY).toPx() / actualYAxisSteps
         )
         val yAlignmentValue = yAxisList[i] + 9.dp.toPx()
 
@@ -117,7 +107,6 @@ private fun DrawScope.drawHorizontalGrid(
     }
 
 }
-
 
 private fun DrawScope.drawVerticalGrid(
     xAxisDataSize: Int,

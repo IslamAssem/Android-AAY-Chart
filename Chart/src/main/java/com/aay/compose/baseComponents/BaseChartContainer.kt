@@ -42,7 +42,7 @@ internal fun <T> DrawScope.baseChartContainer(
         }
     }
 
-    if (showYAxis) {
+    val actualSteps = if (showYAxis) {
         yAxisDrawing(
             upperValue = upperValue,
             lowerValue = lowerValue,
@@ -53,6 +53,8 @@ internal fun <T> DrawScope.baseChartContainer(
             specialChart = specialChart,
             isFromBarChart = isFromBarChart
         )
+    } else {
+        0
     }
 
     grid(
@@ -61,7 +63,7 @@ internal fun <T> DrawScope.baseChartContainer(
         backgroundLineWidth = backgroundLineWidth,
         showGridWithSpacer = showGridWithSpacer,
         spacingY = spacingY,
-        yAxisRange = yAxisRange,
+        actualSteps = actualSteps,
         specialChart = specialChart,
         textMeasurer = textMeasure,
         upperValue = upperValue,
