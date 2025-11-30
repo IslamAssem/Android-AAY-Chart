@@ -55,9 +55,6 @@ afterEvaluate {
     configure<PublishingExtension> {
         publications {
             create<MavenPublication>("release") {
-                groupId = "com.github.IslamAssem"
-                artifactId = "AAY-chart"
-                version = "1.0.0"
                 from(components["release"])
             }
         }
