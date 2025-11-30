@@ -51,6 +51,10 @@ dependencies {
 }
 
 
+tasks.withType<GenerateModuleMetadata>().configureEach {
+    isEnabled = false
+}
+
 afterEvaluate {
     configure<PublishingExtension> {
         publications {
