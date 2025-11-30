@@ -34,6 +34,13 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
 }
 
 dependencies {
@@ -54,6 +61,9 @@ dependencies {
 tasks.withType<GenerateModuleMetadata>().configureEach {
     isEnabled = false
 }
+
+group = "com.github.IslamAssem"
+version = "1.0.0"   // <-- REQUIRED for JitPack to override version
 
 afterEvaluate {
     configure<PublishingExtension> {
