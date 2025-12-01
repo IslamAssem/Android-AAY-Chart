@@ -6,7 +6,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.aay.compose.barChart.model.BarParameters
 import com.aay.compose.baseComponents.model.GridOrientation
 import com.aay.compose.baseComponents.model.LegendPosition
 import com.aay.compose.lineChart.model.LineParameters
@@ -24,13 +23,7 @@ internal object ChartDefaultValues {
         )
     )
 
-    val barParameters: List<BarParameters> = listOf(
-        BarParameters(
-            dataName = "revenue",
-            data = emptyList(),
-            barColor = Color.Blue,
-        )
-    )
+
     val barWidth = 30.dp
     val spaceBetweenBars = 10.dp
     val spaceBetweenGroups = 40.dp

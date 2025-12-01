@@ -9,7 +9,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.aay.compose.utils.formatToThousandsMillionsBillions
-
+import kotlin.text.toFloat
+import kotlin.times
 
 @OptIn(ExperimentalTextApi::class)
 internal fun <T> DrawScope.xAxisDrawing(
@@ -20,64 +21,99 @@ internal fun <T> DrawScope.xAxisDrawing(
     upperValue: Float,
     xRegionWidth: Dp
 ) {
-    if (specialChart) {
-        return
-    }
-    val yTextLayoutResult = textMeasure.measure(
-        text = AnnotatedString(upperValue.formatToThousandsMillionsBillions()),
+    if (specialChart) return
+
+    val yTextLayoutWidth = textMeasure.measure(
+        AnnotatedString(upperValue.formatToThousandsMillionsBillions())
     ).size.width
-    val textSpace = yTextLayoutResult - (yTextLayoutResult/4)
+
+    // Use the same calculation as in QuadraticLines.kt
+    val textSpace = yTextLayoutWidth * 1.5f
 
     xAxisData.forEachIndexed { index, dataPoint ->
-        val xLength = (textSpace.toDp()) + (index * xRegionWidth)
+        val xLength = textSpace.toDp() + (index * xRegionWidth)
 
         drawContext.canvas.nativeCanvas.apply {
+            val text = dataPoint.toString()
+
+            // Measure label text
+            val result = textMeasure.measure(AnnotatedString(text), style = xAxisStyle)
+            val textHeight = result.size.height.toFloat()
+
+            val xPos = xLength.coerceAtMost(size.width.toDp()).toPx()
+            val yPos = size.height - 40.dp.toPx()
+
+            save()
+
+            // Rotate around the data point position
+            translate(xPos, yPos)
+            rotate(60f)
+            // Adjust vertical position to center the text height after rotation
+            translate(0f, -textHeight / 2f)
+
+            // Draw text centered on the pivot
             drawText(
                 textMeasurer = textMeasure,
-                text = dataPoint.toString(),
+                text = text,
                 style = xAxisStyle,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                topLeft = Offset(
-                    xLength.coerceAtMost(size.width.toDp()).toPx(),
-                    size.height / 1.07f
-                )
+                overflow = TextOverflow.Visible,
+                topLeft = Offset.Zero
             )
+
+            restore()
         }
     }
 }
-
 @OptIn(ExperimentalTextApi::class)
-internal fun <T> DrawScope.xAxisDrawing(
+internal fun <T> DrawScope.xAxisDrawingOld(
     xAxisData: List<T>,
-    height: Dp,
     textMeasure: TextMeasurer,
     xAxisStyle: TextStyle,
     specialChart: Boolean,
-    xRegionWidth: Dp,
-    xRegionWidthWithoutSpacing: Dp,
+    upperValue: Float,
+    xRegionWidth: Dp
 ) {
-    if (specialChart) {
-        return
-    }
+    if (specialChart) return
+
+    val yTextLayoutWidth = textMeasure.measure(
+        AnnotatedString(upperValue.formatToThousandsMillionsBillions())
+    ).size.width
+
+    val textSpace = yTextLayoutWidth - (yTextLayoutWidth / 4)
 
     xAxisData.forEachIndexed { index, dataPoint ->
-
-
-        val xLength =
-            (xRegionWidthWithoutSpacing / 3) + (index * (xRegionWidth))
+        val xLength = textSpace.toDp() + (index * xRegionWidth)
 
         drawContext.canvas.nativeCanvas.apply {
+            val text = dataPoint.toString()
+
+            // Measure label text
+            val result = textMeasure.measure(AnnotatedString(text), style = xAxisStyle)
+            val textWidth = result.size.width.toFloat()
+            val textHeight = result.size.height.toFloat()
+
+            val xPos = xLength.coerceAtMost(size.width.toDp()).toPx()
+            val yPos = size.height - 40.dp.toPx()
+
+            save()
+
+            // 🔥 Rotate around the text center
+            translate(xPos, yPos)
+            rotate(60f)  // rotation center =
+            translate(0f, -10f)
+
+            // Draw text centered on the pivot
             drawText(
                 textMeasurer = textMeasure,
-                text = dataPoint.toString(),
+                text = text,
                 style = xAxisStyle,
                 maxLines = 1,
-                topLeft = Offset(
-                    xLength.toPx().coerceAtMost(size.width),
-                    (height.value + 10.dp.toPx()).coerceAtMost(size.height)
-                )
+                overflow = TextOverflow.Visible,
+                topLeft = Offset.Zero
             )
+
+            restore()
         }
     }
 }

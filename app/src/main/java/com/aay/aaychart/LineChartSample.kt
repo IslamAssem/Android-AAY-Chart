@@ -30,7 +30,7 @@ import com.aay.compose.points.PointDrawer
 @Composable
 fun LineChartSample() {
 
-    val pointDrawer = object : PointDrawer{
+    val pointDrawer = object : PointDrawer {
         override fun drawPoint(
             drawScope: DrawScope,
             center: Offset
@@ -44,7 +44,7 @@ fun LineChartSample() {
             )
         }
     }
-    val pointDrawer2 = object : PointDrawer{
+    val pointDrawer2 = object : PointDrawer {
         override fun drawPoint(
             drawScope: DrawScope,
             center: Offset
@@ -68,6 +68,33 @@ fun LineChartSample() {
 //        ),
         LineParameters(
             label = "Nov 25",
+            data = listOf(1.0, 1.0, 1.0, 1.0,1.0, 1.0, 1.0, 1.0),
+            lineColor = Color(0xFFFF7F50),
+            lineType = LineType.DEFAULT_LINE,
+            lineShadow = true,
+            pointDrawer = FilledCircularPointDrawer(color = Color(0xFFFF7F50))
+        ),
+
+        LineParameters(
+            label = "December 25",
+            data = listOf(7.0, 29.0, 73.0, 50.0,7.0, 29.0, 73.0, 50.0),
+            lineColor = Color(0xFF81BE88),
+            lineType = LineType.CURVED_LINE,
+            lineShadow = false,
+            pointDrawer = pointDrawer2//FilledCircularPointDrawer(color = Color(0xFF81BE88))
+        )
+    )
+
+    val testLineParameters2: List<LineParameters> = listOf(
+//        LineParameters(
+//            label = "revenue",
+//            data = listOf(7000000.0, 00.0, 50000000.33, 40000000.0, 100000000.500, 50000000.0),
+//            lineColor = Color.Gray,
+//            lineType = LineType.CURVED_LINE,
+//            lineShadow = true,
+//        ),
+        LineParameters(
+            label = "Nov 25",
             data = listOf(1.0, 1.0),
             lineColor = Color(0xFFFF7F50),
             lineType = LineType.DEFAULT_LINE,
@@ -76,8 +103,8 @@ fun LineChartSample() {
         ),
 
         LineParameters(
-            label = "Dec 25",
-        data = listOf(73.0, 50.0),
+            label = "December 25",
+            data = listOf(73.0, 50.0),
             lineColor = Color(0xFF81BE88),
             lineType = LineType.CURVED_LINE,
             lineShadow = false,
@@ -86,13 +113,23 @@ fun LineChartSample() {
     )
 
     Column(Modifier.padding(top = 16.dp, start = 16.dp, bottom = 16.dp, end = 16.dp)) {
-        MyBarChartParent(modifier =  Modifier.height(300.dp).fillMaxSize().padding(horizontal = 20.dp),listOf("Nov 25", "Dec 25"),testLineParameters)
+        MyBarChartParent(
+            modifier = Modifier
+                .height(300.dp)
+                .fillMaxSize()
+                .padding(horizontal = 20.dp),
+            listOf("Nov 25", "December 25"),
+            testLineParameters2
+        )
         LineChart(
-            modifier = Modifier.height(300.dp).fillMaxSize().padding(horizontal = 20.dp),
+            modifier = Modifier
+                .height(300.dp)
+                .fillMaxSize()
+                .padding(horizontal = 20.dp),
             linesParameters = testLineParameters,
             isGrid = true,
             gridColor = Color.Gray,
-            xAxisData = listOf("Nov 25", "Dec 25"),
+            xAxisData = listOf("Nov 25", "December 25", "December 25", "December 25","Nov 25", "December 25", "December 25", "December 25"),
             animateChart = true,
             showGridWithSpacer = false,
             yAxisStyle = TextStyle(
@@ -126,7 +163,7 @@ data class FilledCircularPointDrawer(
     override fun drawPoint(drawScope: DrawScope, center: Offset) {
 
         with(drawScope as Density) {
-            drawScope.drawCircle( color = color, radius = diameter.toPx() / 2f, center = center )
+            drawScope.drawCircle(color = color, radius = diameter.toPx() / 2f, center = center)
             0
         }
     }
@@ -138,33 +175,33 @@ fun MyBarChartParent(
     labels: List<String>,
     lineParameters: List<LineParameters>
 ) {
-            if (labels.size > 0) {
-                LineChart(
-                    modifier = modifier,
-                    linesParameters = lineParameters,
-                    isGrid = true,
-                    gridColor = Color.LightGray,
-                    xAxisData = labels,
-                    animateChart = true,
-                    showYAxis = true,
-                    showXAxis = true,
-                    showGridWithSpacer = false,
-                    yAxisStyle = TextStyle(
-                        fontSize = 14.sp,
-                        color = Color.Gray,
-                    ),
-                    xAxisStyle = TextStyle(
-                        fontSize = 14.sp,
-                        color = Color.Gray,
-                    ),
-                    descriptionStyle = TextStyle(
-                        fontSize = 14.sp,
-                        color = Color.Gray,
-                    ),
-                    yAxisRange = 14,
-                    oneLineChart = false,
-                    gridOrientation = GridOrientation.GRID,
-                    legendPosition = LegendPosition.BOTTOM,
-                )
+    if (labels.size > 0) {
+        LineChart(
+            modifier = modifier,
+            linesParameters = lineParameters,
+            isGrid = true,
+            gridColor = Color.LightGray,
+            xAxisData = labels,
+            animateChart = true,
+            showYAxis = true,
+            showXAxis = true,
+            showGridWithSpacer = false,
+            yAxisStyle = TextStyle(
+                fontSize = 14.sp,
+                color = Color.Gray,
+            ),
+            xAxisStyle = TextStyle(
+                fontSize = 14.sp,
+                color = Color.Gray,
+            ),
+            descriptionStyle = TextStyle(
+                fontSize = 14.sp,
+                color = Color.Gray,
+            ),
+            yAxisRange = 14,
+            oneLineChart = false,
+            gridOrientation = GridOrientation.HORIZONTAL,
+            legendPosition = LegendPosition.BOTTOM,
+        )
     }
 }

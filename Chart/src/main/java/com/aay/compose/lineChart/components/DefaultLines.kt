@@ -96,13 +96,12 @@ private fun DrawScope.drawLineAsDefault(
         val yTextLayoutResult = textMeasure.measure(
             text = AnnotatedString(upperValue.formatToThousandsMillionsBillions()),
         ).size.width
-        val textSpace = yTextLayoutResult - (yTextLayoutResult / 4)
+
         val info = lineParameter.data[index]
         val ratio = (info - lowerValue) / (upperValue - lowerValue)
-        val startXPoint = (textSpace * 1.5.toFloat().toDp()) + (index * xRegionWidth)
+        val startXPoint = (yTextLayoutResult * 1.5.toFloat().toDp()) + (index * xRegionWidth)
         val startYPoint =
-            (height.toPx() + 8.dp.toPx() - spacingY.toPx() - (ratio * (height.toPx() - spacingY.toPx())))
-
+            (height.toPx() - spacingY.toPx() - (ratio * (height.toPx() - spacingY.toPx())))
         val tolerance = 20.dp.toPx()
         val savedClicks =
             clickedOnThisPoint(clickedPoints, startXPoint.toPx(), startYPoint, tolerance)
@@ -149,7 +148,6 @@ private fun DrawScope.drawLineAsDefault(
 //        )
     }
 }
-
 @OptIn(ExperimentalTextApi::class)
 fun DrawScope.drawCircles(
     lineParameter: LineParameters,
@@ -158,22 +156,32 @@ fun DrawScope.drawCircles(
     spacingY: Dp,
     textMeasure: TextMeasurer,
     xRegionWidth: Dp,
-    offsetAdjustment: Int = 8
 ) {
+    val height = size.height.toDp()
 
-    lineParameter.data.indices.onEach { index ->
-        val height = size.height.toDp()
+    lineParameter.data.forEachIndexed { index, info ->
         val yTextLayoutResult = textMeasure.measure(
             text = AnnotatedString(upperValue.formatToThousandsMillionsBillions()),
         ).size.width
-        val textSpace = yTextLayoutResult - (yTextLayoutResult / 4)
-        val info = lineParameter.data[index]
-        val ratio = (info - lowerValue) / (upperValue - lowerValue)
-        val startXPoint = (textSpace * 1.5.toFloat().toDp()) + (index * xRegionWidth)
-        val startYPoint =
-            (height.toPx() + offsetAdjustment.dp.toPx() - spacingY.toPx() - (ratio * (height.toPx() - spacingY.toPx())))
 
-        lineParameter.pointDrawer?.drawPoint( this, androidx.compose.ui.geometry.Offset(startXPoint.toPx(), startYPoint.toFloat()))
+        val ratio = (info - lowerValue) / (upperValue - lowerValue)
+
+        // FIXED: Use same calculation as grid
+        val xPoint = (yTextLayoutResult * 1.5.toFloat().toDp()) + index * xRegionWidth
+
+        // FIXED: Remove the +11.dp.toPx() offset
+        val yPoint = (height.toPx()
+                - spacingY.toPx()
+                - (ratio * (size.height.toDp() - spacingY).toPx())
+                )
+        lineParameter.pointDrawer?.drawPoint( this, androidx.compose.ui.geometry.Offset(xPoint.toPx(), yPoint.toFloat()))
+
+//
+//        lineParameter.pointDrawer?.drawPoint(
+//            drawScope = this,
+//            offset = Offset(xPoint.toPx(), yPoint),
+//            lineParameter = lineParameter
+//        )
     }
 }
 

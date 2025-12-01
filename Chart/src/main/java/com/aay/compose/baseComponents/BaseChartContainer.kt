@@ -2,21 +2,23 @@ package com.aay.compose.baseComponents
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import com.aay.compose.baseComponents.model.GridOrientation
+import com.aay.compose.utils.formatToThousandsMillionsBillions
 
 @OptIn(ExperimentalTextApi::class)
-internal fun <T> DrawScope.baseChartContainer(
-    xAxisData: List<T>,
+internal fun DrawScope.baseChartContainer(
+    xAxisData: List<String>,
     textMeasure: TextMeasurer,
     upperValue: Float,
     lowerValue: Float,
     isShowGrid: Boolean,
-    gridColor: Color,
     backgroundLineWidth: Float,
+    gridColor: Color,
     showGridWithSpacer: Boolean,
     spacingY: Dp,
     yAxisStyle: TextStyle,
@@ -24,25 +26,13 @@ internal fun <T> DrawScope.baseChartContainer(
     yAxisRange: Int,
     showXAxis: Boolean,
     showYAxis: Boolean,
-    specialChart: Boolean = false,
+    specialChart: Boolean,
     isFromBarChart: Boolean,
-    gridOrientation: GridOrientation = GridOrientation.HORIZONTAL,
+    gridOrientation: GridOrientation,
     xRegionWidth: Dp
-) {
-    if (showXAxis) {
-        if (!isFromBarChart) {
-            xAxisDrawing(
-                xAxisData = xAxisData,
-                textMeasure = textMeasure,
-                xAxisStyle = xAxisStyle,
-                specialChart = specialChart,
-                upperValue = upperValue,
-                xRegionWidth = xRegionWidth
-            )
-        }
-    }
+): Triple<Int, Float, Float> {
 
-    val actualSteps = if (showYAxis) {
+    val (actualSteps, niceMin, niceMax) = if (showYAxis) {
         yAxisDrawing(
             upperValue = upperValue,
             lowerValue = lowerValue,
@@ -54,10 +44,22 @@ internal fun <T> DrawScope.baseChartContainer(
             isFromBarChart = isFromBarChart
         )
     } else {
-        0
+        Triple(yAxisRange, lowerValue, upperValue)
+    }
+
+    if (showXAxis) {
+        xAxisDrawing(
+            xAxisData = xAxisData,
+            textMeasure = textMeasure,
+            xAxisStyle = xAxisStyle,
+            specialChart = specialChart,
+            upperValue = niceMax, // Use niceMax instead of upperValue
+            xRegionWidth = xRegionWidth
+        )
     }
 
     grid(
+        xAxisDataSize = xAxisData.size,
         isShowGrid = isShowGrid,
         gridColor = gridColor,
         backgroundLineWidth = backgroundLineWidth,
@@ -65,10 +67,11 @@ internal fun <T> DrawScope.baseChartContainer(
         spacingY = spacingY,
         actualSteps = actualSteps,
         specialChart = specialChart,
+        upperValue = niceMax,
         textMeasurer = textMeasure,
-        upperValue = upperValue,
         gridOrientation = gridOrientation,
-        xAxisDataSize = xAxisData.size,
-        xRegionWidth = xRegionWidth,
+        xRegionWidth = xRegionWidth
     )
+
+    return Triple(actualSteps, niceMin, niceMax)
 }

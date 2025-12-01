@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.aay.compose.baseComponents.model.GridOrientation
 import com.aay.compose.utils.formatToThousandsMillionsBillions
+import kotlin.div
 
 @OptIn(ExperimentalTextApi::class)
 internal fun DrawScope.grid(
@@ -40,6 +41,7 @@ internal fun DrawScope.grid(
     if (isShowGrid) {
         when (gridOrientation) {
             GridOrientation.HORIZONTAL -> {
+
                 drawHorizontalGrid(
                     spacingY = spacingY,
                     actualYAxisSteps = actualSteps, // Use the actual steps from yAxisDrawing
@@ -74,9 +76,59 @@ internal fun DrawScope.grid(
         }
     }
 }
-private fun DrawScope.drawHorizontalGrid(
+
+fun DrawScope.drawGrid(
+    gridColor: Color,
+    xStart: Float,
+    yStart: Float,
+    xEnd: Float,
+    yEnd: Float,
+    backgroundLineWidth: Float,
+    showGridWithSpacer: Boolean
+) {
+    drawLine(
+        color = gridColor,
+        start = Offset(xStart, yStart),
+        end = Offset(xEnd, yEnd),
+        strokeWidth = backgroundLineWidth,
+        pathEffect = PathEffect.dashPathEffect(
+            if (showGridWithSpacer) floatArrayOf(16f, 16f)
+            else floatArrayOf(1f, 1f),
+            0f
+        )
+    )
+}
+fun DrawScope.drawHorizontalGrid(
     spacingY: Dp,
-    actualYAxisSteps: Int, // Changed parameter name to be clearer
+    actualYAxisSteps: Int,
+    gridColor: Color,
+    backgroundLineWidth: Float,
+    showGridWithSpacer: Boolean,
+    yTextLayoutResult: Int,
+) {
+    val xAxisMaxValue = size.width
+    val yAxisList = mutableListOf<Float>()
+
+    val textSpace = yTextLayoutResult - (yTextLayoutResult/4)
+
+    (0..actualYAxisSteps).forEach { i ->
+        val yAlignmentValue = size.height.toDp().toPx() - spacingY.toPx() - i * (size.height.toDp() - spacingY).toPx() / actualYAxisSteps
+
+        drawGrid(
+            gridColor = gridColor,
+            xStart = (yTextLayoutResult * 1.5.toFloat().toDp()).toPx(),
+            yStart = yAlignmentValue,
+            xEnd = xAxisMaxValue - (textSpace/0.9.toFloat().toDp().toPx()),
+            yEnd = yAlignmentValue,
+            backgroundLineWidth = backgroundLineWidth,
+            showGridWithSpacer = showGridWithSpacer
+        )
+    }
+}
+
+fun DrawScope.drawHorizontalGridOLD(
+    spacingY: Dp,
+    actualYAxisSteps: Int,
     gridColor: Color,
     backgroundLineWidth: Float,
     showGridWithSpacer: Boolean,
@@ -93,7 +145,7 @@ private fun DrawScope.drawHorizontalGrid(
             size.height.toDp()
                 .toPx() - (spacingY.toPx()) - i * (size.height.toDp() - spacingY).toPx() / actualYAxisSteps
         )
-        val yAlignmentValue = yAxisList[i] + 9.dp.toPx()
+        val yAlignmentValue = yAxisList[i]  // Removed the +9.dp.toPx() offset
 
         drawGrid(
             gridColor = gridColor,
@@ -105,10 +157,8 @@ private fun DrawScope.drawHorizontalGrid(
             showGridWithSpacer = showGridWithSpacer
         )
     }
-
 }
-
-private fun DrawScope.drawVerticalGrid(
+fun DrawScope.drawVerticalGrid(
     xAxisDataSize: Int,
     xRegionWidth: Dp,
     gridColor: Color,
@@ -130,26 +180,4 @@ private fun DrawScope.drawVerticalGrid(
             showGridWithSpacer = showGridWithSpacer
         )
     }
-}
-
-private fun DrawScope.drawGrid(
-    gridColor: Color,
-    xStart: Float,
-    yStart: Float,
-    xEnd: Float,
-    yEnd: Float,
-    backgroundLineWidth: Float,
-    showGridWithSpacer: Boolean
-) {
-    drawLine(
-        color = gridColor,
-        start = Offset(xStart, yStart),
-        end = Offset(xEnd, yEnd),
-        strokeWidth = backgroundLineWidth,
-        pathEffect = PathEffect.dashPathEffect(
-            if (showGridWithSpacer) floatArrayOf(16f, 16f)
-            else floatArrayOf(1f, 1f),
-            0f
-        )
-    )
 }

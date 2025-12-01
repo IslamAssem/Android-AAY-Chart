@@ -24,6 +24,7 @@ import com.aay.compose.lineChart.model.LineParameters
 import com.aay.compose.lineChart.model.LineType
 import com.aay.compose.utils.checkIfDataValid
 import com.aay.compose.lineChart.components.drawQuarticLineWithShadow
+import com.aay.compose.utils.formatToThousandsMillionsBillions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -75,12 +76,24 @@ internal fun ChartContent(
             text = AnnotatedString(xAxisData.last().toString()),
         ).size.width
         val spacingX = (size.width / 50.dp.toPx()).dp
-        val spacingY = (size.height / 8.dp.toPx()).dp
-//        val xRegionWidth = (size.width.toDp() / (xAxisData.size - 1).toDp()).toDp() - (textLayoutResult.toDp() / 2)
-        val xRegionWidth = (((size.width - textLayoutResult) / (xAxisData.size - 1)).toDp()) - 30.dp
+        val spacingY = (size.height / 5.dp.toPx()).dp
 
+        // Fix: Ensure proper spacing calculation
+        val yTextLayoutResult = textMeasure.measure(
+            text = AnnotatedString(upperValue.toFloat().formatToThousandsMillionsBillions()),
+        ).size.width
 
-        baseChartContainer(
+        // Calculate available width after y-axis labels
+        val availableWidth = size.width - (yTextLayoutResult * 1.5f)
+
+        // Divide available width by number of intervals (data points - 1)
+        val xRegionWidth = if (xAxisData.size > 1) {
+            (availableWidth / (xAxisData.size - 1)).toDp()
+        } else {
+            availableWidth.toDp()
+        }
+
+        val (_, niceMin, niceMax) = baseChartContainer(
             xAxisData = xAxisData,
             textMeasure = textMeasure,
             upperValue = upperValue.toFloat(),
@@ -100,7 +113,6 @@ internal fun ChartContent(
             gridOrientation = gridOrientation,
             xRegionWidth = xRegionWidth
         )
-
         if (specialChart) {
             if (linesParameters.size >= 2) {
                 throw Exception("Special case must contain just one line")
@@ -108,8 +120,8 @@ internal fun ChartContent(
             linesParameters.forEach { line ->
                 drawQuarticLineWithShadow(
                     line = line,
-                    lowerValue = lowerValue.toFloat(),
-                    upperValue = upperValue.toFloat(),
+                    lowerValue = niceMin,
+                    upperValue = niceMax,
                     animatedProgress = animatedProgress,
                     spacingX = spacingX,
                     spacingY = spacingY,
@@ -118,7 +130,6 @@ internal fun ChartContent(
                     xRegionWidth = xRegionWidth,
                     textMeasure
                 )
-
             }
         } else {
             if (linesParameters.size >= 2) {
@@ -126,11 +137,10 @@ internal fun ChartContent(
             }
             linesParameters.forEach { line ->
                 if (line.lineType == LineType.DEFAULT_LINE) {
-
                     drawDefaultLineWithShadow(
                         line = line,
-                        lowerValue = lowerValue.toFloat(),
-                        upperValue = upperValue.toFloat(),
+                        lowerValue = niceMin,
+                        upperValue = niceMax,
                         animatedProgress = animatedProgress,
                         spacingX = spacingX,
                         spacingY = spacingY,
@@ -138,12 +148,11 @@ internal fun ChartContent(
                         textMeasure = textMeasure,
                         xRegionWidth = xRegionWidth
                     )
-
                 } else {
                     drawQuarticLineWithShadow(
                         line = line,
-                        lowerValue = lowerValue.toFloat(),
-                        upperValue = upperValue.toFloat(),
+                        lowerValue = niceMin,
+                        upperValue = niceMax,
                         animatedProgress = animatedProgress,
                         spacingX = spacingX,
                         spacingY = spacingY,
@@ -152,11 +161,9 @@ internal fun ChartContent(
                         xRegionWidth = xRegionWidth,
                         textMeasure
                     )
-
                 }
             }
         }
-
     }
 
     LaunchedEffect(linesParameters, animateChart) {

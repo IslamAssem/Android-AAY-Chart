@@ -22,6 +22,105 @@ import com.aay.compose.utils.formatToThousandsMillionsBillions
 private var lastClickedPoint: Pair<Float, Float>? = null
 
 @OptIn(ExperimentalTextApi::class)
+fun DrawScope.drawLineAsQuadratic(
+    line: LineParameters,
+    lowerValue: Float,
+    upperValue: Float,
+    animatedProgress: Animatable<Float, AnimationVector1D>,
+    spacingY: Dp,
+    specialChart: Boolean,
+    clickedPoints: MutableList<Pair<Float, Float>>,
+    textMeasurer: TextMeasurer,
+    xRegionWidth: Dp
+) = Path().apply {
+    var medX: Float
+    val height = size.height.toDp()
+    drawPathLineWrapper(
+        lineParameter = line,
+        strokePath = this,
+        animatedProgress = animatedProgress,
+    ) { lineParameter, index ->
+        val yTextLayoutResult = textMeasurer.measure(
+            text = AnnotatedString(upperValue.formatToThousandsMillionsBillions()),
+        ).size.width
+
+        // Use the same calculation as grid - REMOVED textSpace calculation
+        val info = lineParameter.data[index]
+        val nextInfo = lineParameter.data.getOrNull(index + 1) ?: lineParameter.data.last()
+        val firstRatio = (info - lowerValue) / (upperValue - lowerValue)
+        val secondRatio = (nextInfo - lowerValue) / (upperValue - lowerValue)
+
+        // FIXED: Use same calculation as grid
+        val xFirstPoint = (yTextLayoutResult * 1.5.toFloat().toDp()) + index * xRegionWidth
+        val xSecondPoint = (yTextLayoutResult * 1.5.toFloat().toDp()) + (index + checkLastIndex(
+            lineParameter.data,
+            index
+        )) * xRegionWidth
+
+        // FIXED: Remove the +11.dp.toPx() offset that was misaligning
+        val yFirstPoint = (height.toPx()
+                - spacingY.toPx()
+                - (firstRatio * (size.height.toDp() - spacingY).toPx())
+                )
+        val ySecondPoint = (height.toPx()
+                - spacingY.toPx()
+                - (secondRatio * (size.height.toDp() - spacingY).toPx())
+                )
+
+        val tolerance = 20.dp.toPx()
+        val savedClicks =
+            clickedOnThisPoint(clickedPoints, xFirstPoint.toPx(), yFirstPoint, tolerance)
+        if (savedClicks) {
+            if (lastClickedPoint != null) {
+                clickedPoints.clear()
+                lastClickedPoint = null
+            } else {
+                lastClickedPoint = Pair(xFirstPoint.toPx(), yFirstPoint.toFloat())
+                circleWithRectAndText(
+                    x = xFirstPoint,
+                    y = yFirstPoint,
+                    textMeasure = textMeasurer,
+                    info = info,
+                    stroke = Stroke(width = 2.dp.toPx()),
+                    line = line,
+                    animatedProgress = animatedProgress
+                )
+            }
+        }
+        if (index == 0) {
+            moveTo(xFirstPoint.toPx(), yFirstPoint.toFloat())
+            medX = ((xFirstPoint + xSecondPoint) / 2f).toPx()
+            cubicTo(
+                medX,
+                yFirstPoint.toFloat(),
+                medX,
+                ySecondPoint.toFloat(),
+                xSecondPoint.toPx(),
+                ySecondPoint.toFloat()
+            )
+        } else {
+            medX = ((xFirstPoint + xSecondPoint) / 2f).toPx()
+            cubicTo(
+                medX,
+                yFirstPoint.toFloat(),
+                medX,
+                ySecondPoint.toFloat(),
+                xSecondPoint.toPx(),
+                ySecondPoint.toFloat()
+            )
+        }
+        if (index == 0 && specialChart) {
+            chartCircle(
+                xFirstPoint.toPx(),
+                yFirstPoint.toFloat(),
+                color = lineParameter.lineColor,
+                animatedProgress = animatedProgress,
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalTextApi::class)
 internal fun DrawScope.drawQuarticLineWithShadow(
     line: LineParameters,
     lowerValue: Float,
@@ -71,12 +170,11 @@ internal fun DrawScope.drawQuarticLineWithShadow(
         spacingY = spacingY,
         textMeasure = textMeasurer,
         xRegionWidth = xRegionWidth,
-        offsetAdjustment = 11
     )
 }
 
 @OptIn(ExperimentalTextApi::class)
-fun DrawScope.drawLineAsQuadratic(
+fun DrawScope.drawLineAsQuadraticOld(
     line: LineParameters,
     lowerValue: Float,
     upperValue: Float,
